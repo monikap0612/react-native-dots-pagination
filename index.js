@@ -1,26 +1,20 @@
 import React, { Component } from "react";
 import { View, ScrollView, Platform } from "react-native";
 import PropTypes from "prop-types";
-
 // Styles
 import { Styles } from "./styles";
-
 // set to fit
 const scalesPageToFit = Platform.OS === "android";
-
 const DEFAULT_PASSIVE_DOT_WIDTH = 10;
 const DEFAULT_ACTIVE_DOT_WIDTH = 10;
-
 export default class Dots extends Component {
   static get propTypes() {
     return {
       length: PropTypes.number.isRequired,
       active: PropTypes.number.isRequired,
-
       width: PropTypes.number,
       paddingVertical: PropTypes.number,
       paddingHorizontal: PropTypes.number,
-
       // Dots
       passiveDotWidth: PropTypes.number,
       activeDotWidth: PropTypes.number,
@@ -28,68 +22,59 @@ export default class Dots extends Component {
       passiveDotHeight: PropTypes.number,
       passiveColor: PropTypes.string,
       activeColor: PropTypes.string,
-
       // active Border
       activeBorder: PropTypes.bool,
       activeBorderColor: PropTypes.string,
       activeBorderWidth: PropTypes.number,
-
+      passiveBorder: PropTypes.bool,
+      passiveBorderColor: PropTypes.string,
+      passiveBorderWidth: PropTypes.number,
       // events
       onScrollTo: PropTypes.func,
     };
   }
-
   static defaultProps = {
     width: 300,
-
     marginHorizontal: 2,
     paddingVertical: 10,
     paddingHorizontal: 10,
-
     passiveDotWidth: DEFAULT_PASSIVE_DOT_WIDTH,
     activeDotWidth: DEFAULT_ACTIVE_DOT_WIDTH,
     activeDotHeight: DEFAULT_ACTIVE_DOT_WIDTH,
     passiveDotHeight: DEFAULT_PASSIVE_DOT_WIDTH,
     passiveColor: "#CCCCCC",
     activeColor: "#016bd8",
-
     activeBorder: false,
     activeBorderWidth: 3,
     activeBorderColor: "#FFF",
-
+    passiveBorder: false,
+    passiveBorderColor: 3,
+    passiveBorderWidth: "#FFF",
     // events
     onScrollTo() {
       // this function on change index.
     },
   };
-
   componentDidUpdate(prevProps) {
     const newActive = this.props.active;
-
     if (prevProps.active !== newActive) {
       this.scrollTo(newActive);
     }
   }
-
   scrollTo(index) {
     const { width, activeDotWidth, onScrollTo } = this.props;
     const key = `dots_${index}`;
     const get = this[key];
-
     if (get) {
       const x = get.x - (width / 2 - activeDotWidth);
-
       this.scrollRef.scrollTo({ x });
-
       // on change event
       onScrollTo(index, key);
     }
   }
-
   isActive(index) {
     return this.props.active === index;
   }
-
   dotStyle(isActive) {
     const {
       activeDotWidth,
@@ -101,20 +86,20 @@ export default class Dots extends Component {
       activeBorder,
       activeBorderWidth,
       activeBorderColor,
+      passiveBorder,
+      passiveBorderColor,
+      passiveBorderWidth,
       marginHorizontal,
       alignDotsOnXAxis,
     } = this.props;
     const width = isActive ? activeDotWidth : passiveDotWidth;
     const marginTop = alignDotsOnXAxis || !isActive ? 0 : -width / 6;
-
     let height = width;
-
     if (isActive && activeDotHeight != null) {
       height = activeDotHeight;
     } else if (!isActive && passiveDotHeight != null) {
       height = passiveDotHeight;
     }
-
     let style = {
       width,
       height,
@@ -123,16 +108,20 @@ export default class Dots extends Component {
       borderRadius: width,
       marginTop,
     };
-
     // active Border Styles.
     if (activeBorder && isActive) {
       style.borderWidth = activeBorderWidth;
       style.borderColor = activeBorderColor;
     }
-
+    if (isActive) {
+      style.marginTop = 1
+    }
+    if (passiveBorder && !isActive) {
+      style.borderWidth = passiveBorderWidth;
+      style.borderColor = passiveBorderColor;
+    }
     return style;
   }
-
   render() {
     const {
       length,
@@ -151,7 +140,6 @@ export default class Dots extends Component {
       activeWidth +
       (list.length - 1) * passiveDotWidth +
       marginHorizontal * (list.length * 2);
-
     return (
       <View style={Styles.container}>
         <ScrollView
